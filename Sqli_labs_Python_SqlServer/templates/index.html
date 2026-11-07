@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="hero">
+  <div class="wrap hero-grid">
+    <div class="intro">
+      <p class="eyebrow"><span class="short-rule"></span> PYTHON / FLASK / SQL SERVER</p>
+      <h1>Phòng thực hành<br><em>SQL injection.</em></h1>
+      <p class="intro-copy">Gửi request, đọc phản hồi của SQL Server và thử lại cùng payload trên phiên bản đã sửa.</p>
+      <div class="actions"><a class="button primary" href="{{ url_for('notebook', number=1) }}">Mở bài 01 <span>→</span></a>
+        <a class="text-link" href="{{ url_for('guide') }}">Cách làm bài <span>↗</span></a></div>
+    </div>
+    <figure class="trace" aria-label="Ví dụ request và phản hồi của bài 01">
+      <figcaption><span><b class="terminal-icon">⌁</b> Request mẫu</span><span class="mono muted">BÀI / 01</span></figcaption>
+      <div class="trace-body">
+        <div class="trace-line"><span class="trace-label">HTTP</span><code><b>GET</b> /lab/1?<mark>id=1</mark></code></div>
+        <div class="trace-line"><span class="trace-label">T-SQL</span><code><b>SELECT</b> id, title<br><b>FROM</b> dbo.catalog<br><b>WHERE</b> id = <mark>1</mark></code></div>
+        <div class="trace-line"><span class="trace-label">KẾT QUẢ</span><code>1 <span class="muted">|</span> Sổ tay lưới</code></div>
+      </div>
+    </figure>
+  </div>
+</section>
+<section class="wrap catalogue" id="catalogue">
+  <div class="section-title"><div><p class="eyebrow">BỘ BÀI THỰC HÀNH</p><h2>Danh mục bài tập</h2></div>
+    <span class="count mono">{{ lessons|length }} bài / {{ groups|length }} nhóm</span></div>
+  <div class="filters" aria-label="Lọc nhóm bài">
+    <button type="button" data-filter="all" aria-pressed="true">Tất cả</button>
+    {% for name, desc in groups %}<button type="button" data-filter="{{ loop.index0 }}" aria-pressed="false">{{ name }}</button>{% endfor %}
+  </div>
+  {% for name, desc in groups %}
+  {% set group_index = loop.index0 %}
+  <section class="collection group-{{ group_index }}" data-group="{{ group_index }}">
+    <div class="collection-title"><span class="group-dot"></span><h3>{{ name }}</h3><span>{{ desc }}</span></div>
+    {% for lab in lessons if lab.group == group_index %}
+    <a class="lab-row" href="{{ url_for('notebook', number=lab.number) }}">
+      <span class="lab-num mono">{{ '%02d'|format(lab.number) }}</span>
+      <strong>{{ lab.title }}</strong><span class="tech">{{ lab.technique }}</span>
+      <span class="method {{ lab.method|lower }}">{{ lab.method }}</span><span class="row-arrow" aria-hidden="true">↗</span>
+    </a>
+    {% endfor %}
+  </section>
+  {% endfor %}
+</section>
+{% endblock %}

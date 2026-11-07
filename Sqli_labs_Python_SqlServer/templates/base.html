@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101716">
+  <title>{% block title %}SQLi Labs · Phòng thực hành{% endblock %}</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="{{ url_for('static', filename='lab.css') }}">
+  <script src="{{ url_for('static', filename='lab.js') }}" defer></script>
+</head>
+<body>
+  <a class="skip" href="#main">Đến nội dung</a>
+  <header class="topbar">
+    <div class="wrap bar-inner">
+      <a class="brand" href="{{ url_for('index') }}" aria-label="SQLi Labs · Trang chính">
+        <span class="brand-mark" aria-hidden="true">&gt;_</span>SQLi <span>Labs</span>
+      </a>
+      <nav aria-label="Chính" class="top-links">
+        <a href="{{ url_for('index') }}" {% if request.endpoint != 'guide' %}class="active"{% endif %}>Phòng lab</a>
+        <a href="{{ url_for('guide') }}" {% if request.endpoint == 'guide' %}class="active"{% endif %}>Hướng dẫn</a>
+      </nav>
+      <span class="local mono"><i aria-hidden="true"></i>localhost</span>
+    </div>
+  </header>
+  <main id="main">{% block content %}{% endblock %}</main>
+  <footer><div class="wrap footer-inner"><span>SQLi Labs <b>/</b> Flask + SQL Server</span>
+    <a href="https://github.com/Audi-1/sqli-labs" target="_blank" rel="noopener">Lab gốc của Audi ↗</a>
+  </div></footer>
+</body>
+</html>

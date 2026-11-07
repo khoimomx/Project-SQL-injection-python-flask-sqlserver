@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Hướng dẫn thực hành | SQLi Labs{% endblock %}
+{% block content %}
+<article class="wrap guide">
+  <div class="crumb"><a href="{{ url_for('index') }}">Phòng lab</a> / Hướng dẫn</div>
+  <p class="eyebrow">SỔ TAY THỰC HÀNH</p><h1>Từ request đến câu SQL.</h1>
+  <p class="goal">Theo dấu một giá trị từ trình duyệt qua Flask tới SQL Server, rồi quan sát tín hiệu trả về.</p>
+  <section><h2>Làm bài đầu tiên</h2>
+    <ol class="guide-list">
+      <li>Mở <a href="{{ url_for('notebook', number=1) }}">bài 01</a>. Gửi giá trị gốc <code>1</code> để thấy sản phẩm đầu tiên.</li>
+      <li>Đổi thành <code>-1</code>, gửi lại và ghi nhận sự khác biệt. Mở phần gợi ý nếu muốn thử payload UNION.</li>
+      <li>Chuyển sang <strong>Đã sửa</strong> và gửi lại cùng giá trị. Mở “Câu SQL của bài này” để xem vị trí tham số <code>?</code>.</li>
+    </ol>
+  </section>
+  <section><h2>Payload nằm ở đâu?</h2>
+    <p>Payload là giá trị bạn đem thử. Ví dụ, trong <code>GET /lab/1?id=1</code>, phương thức là <code>GET</code>, tên tham số là <code>id</code> và giá trị là <code>1</code>. Bạn có thể thay giá trị bằng một biểu thức.</p>
+    <dl class="guide-terms">
+      <dt>URL</dt><dd>Bài 01, 03, 05, 07 đọc tham số sau dấu <code>?</code>.</dd>
+      <dt>Form</dt><dd>Bài 02, 04, 06, 08, 11 đọc trường form từ body POST.</dd>
+      <dt>Header</dt><dd>Bài 09 đọc <code>X-Lab-Client</code> hoặc <code>User-Agent</code> từ header của request.</dd>
+      <dt>Cookie</dt><dd>Bài 10 đọc cookie <code>lab_visitor</code>. Workbench đặt cookie này trước khi gửi.</dd>
+      <dt>Giá trị đã lưu</dt><dd>Bài 12 nhận form ở bước 1. Bước 2 đọc lại bộ lọc từ CSDL trong cùng phiên và chế độ.</dd>
+    </dl>
+  </section>
+  <section><h2>Gửi request từ PowerShell</h2>
+    <p>Workbench gọi các endpoint HTTP thật. Bạn có thể thử trực tiếp với curl.exe, DevTools hoặc một HTTP client khác. Thêm <code>mode=fixed</code> vào query string để kiểm tra bản đã sửa.</p>
+    <pre class="sql">curl.exe -G --data-urlencode "id=1 AND 1=2" http://127.0.0.1:5000/lab/1
+curl.exe --data-urlencode "q=Sổ" http://127.0.0.1:5000/lab/2
+curl.exe -X POST -H "X-Lab-Client: LabBrowser" http://127.0.0.1:5000/lab/9
+curl.exe -b "lab_visitor=MK-01" http://127.0.0.1:5000/lab/10</pre>
+  </section>
+  <section><h2>Đọc tín hiệu</h2>
+    <p><strong>In-band.</strong> Tìm mã dữ liệu xuất hiện trong kết quả SELECT hoặc trong lỗi chuyển kiểu. HTTP 422 của một bài error-based có thể chứa chính thông tin bạn đang tìm.</p>
+    <p><strong>Blind.</strong> Tạo hai điều kiện đúng/sai đối chứng, sau đó mới thử suy ra dữ liệu. Với bài time-based, lặp lại phép đo. Con số hiển thị là thời gian từ lúc trình duyệt gửi request đến lúc nhận xong phản hồi.</p>
+    <p><strong>Ngữ cảnh.</strong> Xem dữ liệu đi vào từ header, cookie, câu UPDATE hoặc từ một lần lưu trước đó. Hồ sơ và bộ lọc được tách theo phiên trình duyệt và chế độ truy vấn.</p>
+  </section>
+  <a class="button primary" href="{{ url_for('notebook', number=1) }}">Mở bài 01 →</a>
+</article>
+{% endblock %}

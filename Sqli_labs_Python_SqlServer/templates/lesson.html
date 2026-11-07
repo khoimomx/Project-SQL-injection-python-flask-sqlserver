@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}Bài {{ '%02d'|format(lesson.number) }} · {{ lesson.title }} | SQLi Labs{% endblock %}
+{% block content %}
+<div class="wrap notebook">
+  <aside class="sidebar">
+    <a class="back-link" href="{{ url_for('index') }}#catalogue">← Danh mục bài tập</a>
+    <nav aria-label="Danh mục bài">
+    {% for group, desc in groups %}
+      {% set group_index = loop.index0 %}
+      <h2 class="eyebrow">{{ group }}</h2>
+      {% for lab in lessons if lab.group == group_index %}
+      <a href="{{ url_for('notebook', number=lab.number) }}" {% if lab.number == lesson.number %}aria-current="page"{% endif %}>
+        <span class="mono">{{ '%02d'|format(lab.number) }}</span><span>{{ lab.title }}</span>
+      </a>
+      {% endfor %}
+    {% endfor %}
+    </nav>
+  </aside>
+  <article class="lesson-body">
+    <div class="crumb"><a href="{{ url_for('index') }}#catalogue">Phòng lab</a> / {{ groups[lesson.group][0] }} / Bài {{ '%02d'|format(lesson.number) }}</div>
+    <div class="lesson-meta"><span class="badge">{{ lesson.technique }}</span><span class="mono muted">{{ sources[lesson.source] }}</span></div>
+    <h1>{{ lesson.title }}</h1>
+    <p class="goal">{{ lesson.goal }}</p>
+    <div class="mode-row"><span>Chế độ truy vấn</span><nav aria-label="Chế độ truy vấn" class="switch">
+      <a href="{{ url_for('notebook', number=lesson.number) }}" {% if mode == 'vuln' %}aria-current="true"{% endif %}>Dễ lỗi</a>
+      <a href="{{ url_for('notebook', number=lesson.number, mode='fixed') }}" {% if mode == 'fixed' %}aria-current="true"{% endif %}>Đã sửa</a>
+    </nav></div>
+
+    <form class="workbench" id="workbench" data-number="{{ lesson.number }}" data-mode="{{ mode }}"
+          data-source="{{ lesson.source }}" data-key="{{ lesson.key }}" data-method="{{ lesson.method }}"
+          data-endpoint="{{ url_for('exercise', number=lesson.number) }}" data-baseline="{{ lesson.baseline }}"
+          {% if lesson.source == 'stored' %}data-save="{{ url_for('save_filter') }}"{% endif %}
+          {% if lesson.result == 'time' %}data-timing="yes"{% endif %}>
+      <div class="panel-head"><h2>Request</h2><span class="endpoint"><span class="method {{ lesson.method|lower }}">{{ lesson.method }}</span> <code>/lab/{{ lesson.number }}</code></span></div>
+      <div class="panel-pad">
+        <div class="input-label"><label for="payload">{{ sources[lesson.source] }} <span>/</span> <code>{{ lesson.key }}</code></label>
+          <button type="button" class="link-button" data-restore>Giá trị gốc</button></div>
+        <textarea id="payload" name="{{ lesson.key }}" rows="3" maxlength="600" spellcheck="false">{{ lesson.baseline }}</textarea>
+        <div class="actions work-actions">
+          {% if lesson.source == 'stored' %}
+          <button type="submit" class="button primary" value="save">1. Lưu bộ lọc</button>
+          <button type="submit" class="button outline" value="run">2. Chạy bộ lọc đã lưu →</button>
+          {% else %}
+          <button type="submit" class="button primary" value="run">Gửi request <span>→</span></button>
+          {% endif %}
+        </div>
+      </div>
+    </form>
+    <noscript><p>Workbench cần JavaScript. Bạn cũng có thể gửi request bằng curl theo trang Hướng dẫn.</p></noscript>
+    <section class="response" aria-label="Phản hồi HTTP" aria-live="polite">
+      <div class="panel-head"><h2>Phản hồi</h2><span id="response-meta" class="mono muted">Chưa gửi</span></div>
+      <pre id="response-body">Chờ request đầu tiên.</pre>
+      <div class="timings" id="timings" hidden></div>
+      <details id="request-detail" hidden><summary>Request đã gửi</summary><pre id="wire-request"></pre></details>
+    </section>
+    <div class="references">
+      <details><summary>Gợi ý và payload mẫu</summary><div class="details-content"><p>{{ lesson.hint }}</p>
+        {% for label, payload in lesson.probes %}
+        <div class="sample"><div><strong>{{ label }}</strong><pre>{{ payload }}</pre></div>
+          <button type="button" class="small-button" data-example="{{ payload }}">Dùng thử</button></div>
+        {% endfor %}
+      </div></details>
+      <details><summary>Câu SQL của bài này</summary><div class="details-content">
+        {% if lesson.source == 'stored' %}<p>Bước 1 lưu bộ lọc bằng tham số. Hai câu dưới đây thuộc bước 2.</p>{% endif %}
+        <h3>Dễ lỗi <span>· ghép trực tiếp đầu vào</span></h3><pre class="sql">{{ lesson.vulnerable_sql }}</pre>
+        <h3>Đã sửa <span>· truyền giá trị qua tham số ?</span></h3><pre class="sql">{{ lesson.fixed_sql }}</pre>
+      </div></details>
+    </div>
+    <nav class="steps" aria-label="Chuyển bài">
+      {% if lesson.number > 1 %}<a href="{{ url_for('notebook', number=lesson.number-1) }}">← Bài trước</a>{% else %}<a href="{{ url_for('index') }}">← Danh mục</a>{% endif %}
+      {% if lesson.number < lessons|length %}<a href="{{ url_for('notebook', number=lesson.number+1) }}">Bài tiếp theo →</a>{% else %}<a href="{{ url_for('index') }}">Về danh mục →</a>{% endif %}
+    </nav>
+  </article>
+</div>
+{% endblock %}
